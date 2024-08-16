@@ -2,6 +2,7 @@ import initSupabase from "./utils/initSupabase";
 import { swaggerUI } from "@hono/swagger-ui";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import ping from "./ping";
+import notificationsFetchApi from "./notifications/get";
 
 const app = new OpenAPIHono();
 app.get(
@@ -13,7 +14,7 @@ app.get(
 
 app.doc("/doc", {
   info: {
-    title: "An API",
+    title: "QuestKeeper Notifications Microservice API",
     version: "v1",
   },
   openapi: "3.1.0",
@@ -54,8 +55,7 @@ app.openapi(
   }
 );
 
-
-
 app.route("/ping", ping);
+app.route("/notifications", notificationsFetchApi);
 
 export default app;
