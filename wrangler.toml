@@ -9,8 +9,6 @@ routes = [
 [vars]
 SUPABASE_URL = ""
 SUPABASE_KEY = ""
-# SUPABASE_URL = ""
-# SUPABASE_KEY = ""
 
 [placement]
 mode = "smart"
