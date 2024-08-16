@@ -1,0 +1,22 @@
+{
+  "name": "qk_notifications_service",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts",
+    "deploy": "wrangler deploy --minify src/index.ts"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "^0.4.0",
+    "@hono/zod-openapi": "^0.15.3",
+    "@novu/node": "^2.0.0-canary.1",
+    "@supabase/supabase-js": "^2.45.1",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.33.0",
+    "hono": "^4.5.5",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240529.0",
+    "drizzle-kit": "^0.24.0",
+    "wrangler": "^3.71.0"
+  }
+}
