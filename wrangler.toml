@@ -9,6 +9,7 @@ routes = [
 [vars]
 SUPABASE_URL = ""
 SUPABASE_KEY = ""
+NOVU_API_KEY = ""
 
 [placement]
 mode = "off"

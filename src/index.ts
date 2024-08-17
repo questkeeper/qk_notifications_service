@@ -3,7 +3,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import ping from "./ping";
 import notificationsApi from "./notifications/route";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono().basePath("/v1/notifications");
 app.get(
   "/ui",
   swaggerUI({
