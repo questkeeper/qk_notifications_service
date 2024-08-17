@@ -1,8 +1,8 @@
-import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { z, createRoute } from "@hono/zod-openapi";
 import { Context } from "hono";
 import initSupabase from "../utils/initSupabase";
 
-const getNotificationsFromTaskIdRoute = createRoute({
+export const getNotificationsFromTaskIdRoute = createRoute({
   method: "get",
   path: "/tasks/{taskId}",
   request: {
@@ -23,12 +23,12 @@ const getNotificationsFromTaskIdRoute = createRoute({
           }),
         },
       },
-      description: "Retrieve the user",
+      description: "Returns a list of notifications for a given task",
     },
   },
 });
 
-async function getNotificationsFromTaskId(
+export async function getNotificationsFromTaskId(
   c: Context<{}, any, {}>
 ): Promise<any> {
   const { taskId } = c.req.valid("param" as never);
@@ -46,11 +46,3 @@ async function getNotificationsFromTaskId(
 
   return c.json(scheduledNotifications);
 }
-
-const notificationsFetchApi = new OpenAPIHono();
-notificationsFetchApi.openapi(
-  getNotificationsFromTaskIdRoute,
-  getNotificationsFromTaskId
-);
-
-export default notificationsFetchApi;
