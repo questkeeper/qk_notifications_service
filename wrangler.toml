@@ -1,9 +1,9 @@
 name = "qk_notifications_service"
 compatibility_date = "2024-08-15"
+node_compat = true
 
 routes = [
-    { pattern = "notifications.questkeeper.app", zone_name = "questkeeper.app" },
-    { pattern = "notifications.questkeeper.app/*", zone_name = "questkeeper.app" },
+    { pattern = "api.questkeeper.app/v1/notifications/*", zone_name = "questkeeper.app" },
 ]
 
 [vars]
@@ -11,7 +11,7 @@ SUPABASE_URL = ""
 SUPABASE_KEY = ""
 
 [placement]
-mode = "smart"
+mode = "off"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
