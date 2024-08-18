@@ -1,8 +1,9 @@
 ```
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
+This pushes to CF through Wrangler. Authentication to zone is required for deploying via wrangler.
 ```
-npm run deploy
+yarn deploy
 ```
