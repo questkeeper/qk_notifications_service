@@ -10,9 +10,14 @@ routes = [
 SUPABASE_URL = ""
 SUPABASE_KEY = ""
 NOVU_API_KEY = ""
+API_KEY = ""
+JWT_SECRET = ""
 
 [placement]
 mode = "off"
+
+[env.dev]
+vars = { ENVIRONMENT = "dev" }
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
