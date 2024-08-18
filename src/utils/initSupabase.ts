@@ -2,6 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { Context } from "hono";
 import { env } from "hono/adapter";
 
+export let supabase: ReturnType<typeof createClient> | null = null;
+
 async function initSupabase(c: Context<{}, any, {}>) {
   const { SUPABASE_URL, SUPABASE_KEY } = env<{
     SUPABASE_URL: string;
@@ -9,12 +11,12 @@ async function initSupabase(c: Context<{}, any, {}>) {
   }>(c);
 
   // Initialize Supabase client
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
   if (supabase === null) {
     return null;
   }
 
-  return supabase;
+  return supabase
 }
 
 export default initSupabase;
