@@ -7,11 +7,7 @@ routes = [
 ]
 
 [vars]
-SUPABASE_URL = ""
-SUPABASE_KEY = ""
-NOVU_API_KEY = ""
-API_KEY = ""
-JWT_SECRET = ""
+SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co"
 
 [placement]
 mode = "off"
