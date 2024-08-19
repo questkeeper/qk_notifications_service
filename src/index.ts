@@ -6,7 +6,7 @@ import ping from "./ping";
 import notificationsApi from "./notifications/route";
 import initSupabase from "./utils/initSupabase";
 import { appendTrailingSlash } from "hono/trailing-slash";
-import { jwt } from "hono/jwt";
+import { cors } from "hono/cors";
 
 const app = new OpenAPIHono().basePath("/v1/notifications");
 app.get("/", async (c) => {
@@ -19,6 +19,19 @@ app.get(
   "/ui",
   swaggerUI({
     url: "/v1/notifications/doc",
+  })
+);
+
+app.use(
+  cors({
+    origin: ["*"],
+    allowMethods: ["POST", "GET"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-API-KEY",
+      "X-CLIENT-INFO",
+    ],
   })
 );
 
