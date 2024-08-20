@@ -4,6 +4,7 @@ import {
   getNotificationsFromTaskId,
   getNotificationsFromTaskIdRoute,
 } from "./get";
+import { sendNotification, sendNotificationRoute } from "./send";
 
 const notificationsApi = new OpenAPIHono();
 
@@ -13,5 +14,7 @@ notificationsApi.openapi(
   getNotificationsFromTaskIdRoute,
   getNotificationsFromTaskId
 );
+
+notificationsApi.openapi(sendNotificationRoute, sendNotification);
 
 export default notificationsApi;
