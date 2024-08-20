@@ -1,56 +1,7 @@
-import { createRoute } from "@hono/zod-openapi";
 import { Context } from "hono";
 import { env } from "hono/adapter";
 import { supabase } from "../utils/initSupabase";
 import generateAccessToken from "../utils/generateFirebaseAccessToken";
-
-export const createProfileRoute = createRoute({
-  method: "post",
-  path: "/",
-  requestBody: {
-    content: {
-      "application/json": {
-        schema: {
-          type: "object",
-          properties: {
-            type: { type: "string", enum: ["INSERT", "UPDATE", "DELETE"] },
-            table: { type: "string" },
-            record: {
-              type: "object",
-              // Properties are the profile,
-              nullable: true,
-            },
-            schema: { type: "string", enum: ["public"] },
-            old_record: {
-              type: "object",
-              // Properties are the old profile or null
-              nullable: true,
-            },
-          },
-          required: ["type", "table", "record", "schema"],
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              error: { type: "string", nullable: true },
-              message: { type: "string" },
-              notifications: { type: "array", items: { type: "object" } },
-            },
-          },
-        },
-      },
-      description: "Returns a success message",
-    },
-  },
-});
 
 async function createFcmDeviceGroup(
   c: Context<{}, any, {}>,
@@ -109,9 +60,11 @@ async function createFcmDeviceGroup(
   return result.notification_key;
 }
 
-export async function createProfile(c: Context<{}, any, {}>): Promise<any> {
+export async function createProfile(
+  c: Context<{}, any, {}>,
+  body: any
+): Promise<any> {
   try {
-    const body = await c.req.json();
     const user_device_group = await supabase
       ?.from("user_device_group")
       .select("*")
