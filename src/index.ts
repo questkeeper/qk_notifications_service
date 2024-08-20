@@ -7,6 +7,7 @@ import notificationsApi from "./notifications/route";
 import initSupabase from "./utils/initSupabase";
 import { appendTrailingSlash } from "hono/trailing-slash";
 import { cors } from "hono/cors";
+import profilesApi from "./profiles/route";
 
 const app = new OpenAPIHono().basePath("/v1/notifications");
 app.get("/", async (c) => {
@@ -81,5 +82,6 @@ app.doc("/doc", {
 });
 
 app.route("/", notificationsApi);
+app.route("/profiles", profilesApi);
 
 export default app;
