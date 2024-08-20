@@ -9,9 +9,11 @@ export default async function generateAccessToken(
   }>(c);
 
   const SERVICE_ACCOUNT_EMAIL = workersEnv.FIREBASE_CLIENT_EMAIL;
-  const { FIREBASE_PRIVATE_KEY } = c.env as {
+  let { FIREBASE_PRIVATE_KEY } = c.env as {
     FIREBASE_PRIVATE_KEY: string;
   };
+
+  FIREBASE_PRIVATE_KEY = FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
 
   // Generate a JWT token
   const now = Math.floor(Date.now() / 1000);
