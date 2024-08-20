@@ -7,14 +7,14 @@ async function deleteFcmTokenFromGroup(
   c: Context<{}, any, {}>,
   user_device_group: { data: { user_id: string; device_group: string } | null },
   recordBody: {
-    record: { user_id: string; token: string };
+    old_record: { user_id: string; token: string };
   }
 ): Promise<string> {
   if (user_device_group?.data?.device_group === null) {
     throw new Error("Device group is required");
   }
 
-  if (recordBody.record.token === null) {
+  if (recordBody.old_record.token === null) {
     throw new Error("Token is required");
   }
 
@@ -31,9 +31,9 @@ async function deleteFcmTokenFromGroup(
   const url = `https://fcm.googleapis.com/fcm/notification`;
   const body = {
     operation: "remove",
-    notification_key_name: `appUser~${recordBody.record.user_id}`,
+    notification_key_name: `appUser~${recordBody.old_record.user_id}`,
     notification_key: user_device_group.data!.device_group,
-    registration_ids: [recordBody.record.token],
+    registration_ids: [recordBody.old_record.token],
   };
 
   const response = await fetch(url, {
@@ -59,11 +59,12 @@ export async function deleteProfile(
   c: Context<{}, any, {}>,
   body: any
 ): Promise<any> {
+  const userId = body.old_record.user_id;
   try {
     const user_device_group = await supabase
       ?.from("user_device_group")
       .select("*")
-      .eq("user_id", body.record.user_id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     await deleteFcmTokenFromGroup(c, user_device_group as any, body);
@@ -71,13 +72,10 @@ export async function deleteProfile(
     const allProfiles = await supabase
       ?.from("profiles")
       .select("*")
-      .eq("user_id", body.record.user_id);
+      .eq("user_id", userId);
 
-    if (allProfiles?.count === 0) {
-      await supabase
-        ?.from("user_device_group")
-        .delete()
-        .eq("user_id", body.record.user_id);
+    if (allProfiles?.data?.length === 0) {
+      await supabase?.from("user_device_group").delete().eq("user_id", userId);
     }
 
     return c.json(
