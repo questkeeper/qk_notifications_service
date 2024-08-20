@@ -19,11 +19,11 @@ async function deleteFcmTokenFromGroup(
   }
 
   const workersEnv = env<{
-    FIREBASE_PROJECT_ID: string;
+    FCM_PROJECT_ID: string;
     FIREBASE_CLIENT_EMAIL: string;
   }>(c);
   const accessToken = await generateAccessToken(c);
-  const PROJECT_ID = workersEnv.FIREBASE_PROJECT_ID;
+  const PROJECT_ID = workersEnv.FCM_PROJECT_ID;
 
   console.log("Device group", user_device_group.data!.device_group);
 

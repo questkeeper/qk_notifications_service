@@ -7,14 +7,15 @@ routes = [
 
 [vars]
 SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co"
-FIREBASE_PROJECT_ID = "479691835174"
+FCM_PROJECT_ID = "479691835174"
 FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-wh0yl@assigngo-d890c.iam.gserviceaccount.com"
+FIREBASE_PROJECT_ID = "assigngo-d890c"
 
 [placement]
 mode = "off"
 
 [env.dev]
-vars = { ENVIRONMENT = "dev", FIREBASE_PROJECT_ID = "479691835174", FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-wh0yl@assigngo-d890c.iam.gserviceaccount.com", SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co" }
+vars = { ENVIRONMENT = "dev", FCM_PROJECT_ID = "479691835174", FIREBASE_PROJECT_ID = "assigngo-d890c", FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-wh0yl@assigngo-d890c.iam.gserviceaccount.com", SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co" }
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
