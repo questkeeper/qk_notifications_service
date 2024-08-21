@@ -6,7 +6,7 @@ import { env } from "hono/adapter";
 
 export const sendNotificationRoute = createRoute({
   method: "post",
-  path: "/",
+  path: "/send",
   requestBody: {
     content: {
       "application/json": {
