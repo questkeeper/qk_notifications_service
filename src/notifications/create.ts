@@ -1,70 +1,62 @@
 import { createRoute } from "@hono/zod-openapi";
 import { Context } from "hono";
-import { env } from "hono/adapter";
-import { Novu } from "@novu/node";
-import initSupabase from "../utils/initSupabase";
+import { supabase } from "../utils/initSupabase";
 
-interface Notification {
+interface Task {
   id: number;
-  user_id: string;
-  taskId: number;
-  dueDate: string;
-  delivered: boolean;
-  message: string;
   title: string;
+  dueDate: string;
+  spaceId: number | null;
+  starred: boolean;
+  user_id: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+  categoryId: number | null;
+  description: string;
 }
 
-interface NotificationTransaction {
-  id: number;
-  notificationId: number;
-  transactionId: number;
-  scheduledAt: Date;
+interface Notification {
+  title: string;
+  message: string;
+  user_id: string;
+  scheduled_at: string;
+  dueDate: string;
+  taskId: number;
 }
 
 interface WebhookPayload {
   type: "INSERT" | "UPDATE" | "DELETE";
   table: string;
-  record: Notification;
+  record: Task;
   schema: "public";
-  old_record: Notification | null;
+  old_record: Task | null;
 }
 
 export const createNotificationRoute = createRoute({
   method: "post",
+  path: "/create",
   requestBody: {
     content: {
       "application/json": {
         schema: {
           type: "object",
           properties: {
-            type: { type: "string" },
+            type: { type: "string", enum: ["INSERT", "UPDATE", "DELETE"] },
             table: { type: "string" },
             record: {
               type: "object",
-              properties: {
-                id: { type: "number" },
-                user_id: { type: "string" },
-                taskId: { type: "number" },
-                dueDate: { type: "string" },
-                delivered: { type: "boolean" },
-                message: { type: "string" },
-                title: { type: "string" },
-              },
+              // Properties are the task
+              required: ["id", "title", "dueDate", "user_id"],
             },
-            schema: { type: "string" },
+            schema: { type: "string", enum: ["public"] },
             old_record: {
               type: "object",
-              properties: {
-                id: { type: "number" },
-                user_id: { type: "string" },
-                taskId: { type: "number" },
-                dueDate: { type: "string" },
-                delivered: { type: "boolean" },
-                message: { type: "string" },
-                title: { type: "string" },
-              },
+              // Properties are the task or null
+              nullable: true,
             },
           },
+          required: ["type", "table", "record", "schema"],
         },
       },
     },
@@ -77,8 +69,9 @@ export const createNotificationRoute = createRoute({
             type: "object",
             properties: {
               success: { type: "boolean" },
-              error: { type: "string" },
+              error: { type: "string", nullable: true },
               message: { type: "string" },
+              notifications: { type: "array", items: { type: "object" } },
             },
           },
         },
@@ -86,85 +79,87 @@ export const createNotificationRoute = createRoute({
       description: "Returns a success message",
     },
   },
-  path: "/",
 });
 
 export async function createNotification(
   c: Context<{}, any, {}>
 ): Promise<any> {
-  const webhookPayload: WebhookPayload = await c.req.json();
-  console.info("Received payload", webhookPayload);
-  const payload = webhookPayload.record;
-
-  const { NOVU_API_KEY } = env<{
-    NOVU_API_KEY: string;
-  }>(c);
-
-  const novu = new Novu(NOVU_API_KEY);
-  const supabase = await initSupabase(c);
-
-  if (supabase === null) {
-    return c.json({ error: "Failed to initialize Supabase" }, 500);
-  }
-
-  // TODO: Get the user's preferences for notification times
-  // Current setup is temporary
-  const times = [12, 24, 48];
-  const sendAtArray = [];
-  const transactionIds: string[] = [];
-
   let resData = {
     success: true,
     error: null,
+    data: null as unknown | null,
     message: "Notification scheduled successfully",
   };
 
-  const dueAt = new Date(payload.dueDate);
-
   try {
-    for (let i = 0; i < times.length; i++) {
-      const time = times[i];
-      const sendAt = new Date(dueAt.getTime() - time * 60 * 60 * 1000);
+    const webhookPayload: WebhookPayload = await c.req.json();
+    const payload = webhookPayload.record;
+    const oldRecord = webhookPayload.old_record;
 
-      // Skip if the sendAt time is in the past
-      if (sendAt < new Date()) {
-        continue;
-      }
-
-      sendAtArray.push(sendAt);
-      const transaction = await novu.trigger("schedulepush", {
-        payload: {
-          sendAt: sendAt.toISOString(),
-          payload: {
-            title: payload.title,
-            message: payload.message,
-          },
-        },
-        to: {
-          subscriberId: payload.user_id,
-        },
-      });
-
-      transactionIds.push(transaction.data.data.transactionId);
+    if (supabase === null) {
+      throw new Error("Failed to initialize Supabase");
     }
 
-    await supabase.from("notification_transactions").insert(
-      sendAtArray.map((sendAt) => ({
-        notificationId: payload.id,
-        scheduledAt: sendAt,
-        transactionId: transactionIds.shift(),
-      }))
-    );
+    if (
+      oldRecord &&
+      (webhookPayload.type === "UPDATE" || webhookPayload.type === "DELETE")
+    ) {
+      // Delete existing notifications if the task was updated or deleted
+      await supabase
+        .from("notification_schedule")
+        .delete()
+        .eq("taskId", payload.id);
+
+      if (webhookPayload.type === "DELETE") {
+        resData.message = "Notification deleted successfully";
+        return c.json(resData, 200);
+      }
+    }
+
+    // Temporary setup for notification times
+    const times = [12, 24, 48];
+    const notifications = Array<Notification>();
+    const dueAt = new Date(payload.dueDate).toISOString();
+
+    times.forEach((time) => {
+      const sendAt = new Date(
+        new Date(dueAt).getTime() - time * 60 * 60 * 1000
+      );
+      if (sendAt > new Date()) {
+        notifications.push({
+          title: payload.title,
+          message: payload.description
+            ? payload.description.substring(
+                0,
+                Math.min(75, payload.description.length)
+              )
+            : "",
+          user_id: payload.user_id,
+          scheduled_at: sendAt.toISOString(),
+          dueDate: dueAt,
+          taskId: payload.id,
+        });
+      }
+    });
+
+    const { data, error } = await supabase
+      .from("notification_schedule")
+      .upsert(notifications as any)
+      .select();
+
+    if (error) {
+      throw error;
+    }
+
+    resData.data = data;
   } catch (error: any) {
     console.error(error);
-    resData = {
-      success: false,
-      error: error,
-      message: "Failed to schedule notification",
-    };
+    resData.success = false;
+    resData.error = error.message;
+    resData.message = "Failed to schedule notification";
   }
 
-  return c.json(resData, 200, {
+  return c.json(resData, resData.success ? 200 : 500, {
     "Content-Type": "application/json",
   });
 }
