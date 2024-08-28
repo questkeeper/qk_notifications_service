@@ -105,19 +105,34 @@ export async function createNotification(
       (webhookPayload.type === "UPDATE" || webhookPayload.type === "DELETE")
     ) {
       // Delete existing notifications if the task was updated or deleted
-      await supabase
-        .from("notification_schedule")
-        .delete()
-        .eq("taskId", payload.id);
+      if (
+        payload.dueDate !== oldRecord.dueDate ||
+        payload.starred !== oldRecord.starred ||
+        payload.completed ||
+        webhookPayload.type === "DELETE" ||
+        payload.title !== oldRecord.title ||
+        payload.description !== oldRecord.description
+      ) {
+        await supabase
+          .from("notification_schedule")
+          .delete()
+          .eq("taskId", payload.id);
+      } else {
+        resData.message = "Notification does not need to be updated";
+        return c.json(resData, 200);
+      }
 
-      if (webhookPayload.type === "DELETE") {
+      if (webhookPayload.type === "DELETE" || payload.completed) {
         resData.message = "Notification deleted successfully";
         return c.json(resData, 200);
       }
     }
 
-    // Temporary setup for notification times
-    const times = [12, 24, 48];
+    // TODO: Temporary setup for notification times
+    const times = [24, 48];
+    if (payload.starred) {
+      times.push(12);
+    }
     const notifications = Array<Notification>();
     const dueAt = new Date(payload.dueDate).toISOString();
 
@@ -140,6 +155,21 @@ export async function createNotification(
           taskId: payload.id,
         });
       }
+    });
+
+    // Send when the task is due
+    notifications.push({
+      title: payload.title,
+      message: payload.description
+        ? payload.description.substring(
+            0,
+            Math.min(75, payload.description.length)
+          )
+        : "",
+      user_id: payload.user_id,
+      scheduled_at: new Date(dueAt).toISOString(),
+      dueDate: dueAt,
+      taskId: payload.id,
     });
 
     const { data, error } = await supabase
