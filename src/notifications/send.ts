@@ -68,25 +68,17 @@ export async function sendNotification(c: Context<{}, any, {}>): Promise<any> {
   }
 
   const accessToken = await generateAccessToken(c);
-  const response = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: {
-          notification: {
-            title: notification.title,
-            body: notification.message,
-          },
-          token: user.device_group,
-        },
-      }),
-    }
-  );
+  const response = await sendFcmMessage({
+    PROJECT_ID,
+    accessToken,
+    deviceGroup: user.device_group as string,
+    isNotificationMessage: true,
+    notification: {
+      title: notification.title,
+      message: notification.message,
+    },
+    dataMessage: null,
+  });
 
   await supabase
     .from("notification_schedule")
