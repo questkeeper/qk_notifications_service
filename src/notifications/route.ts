@@ -5,12 +5,12 @@ import {
   getNotificationsFromTaskIdRoute,
 } from "./get";
 import { sendNotification, sendNotificationRoute } from "./send";
-import { notifyInApp, notifyInAppRoute } from "./notify";
+import { notifyRoute, notifyHandler } from "./notify";
 
 const notificationsApi = new OpenAPIHono()
   .openapi(createNotificationRoute, createNotification)
   .openapi(getNotificationsFromTaskIdRoute, getNotificationsFromTaskId)
   .openapi(sendNotificationRoute, sendNotification)
-  .openapi(notifyInAppRoute, notifyInApp);
+  .openapi(notifyRoute, notifyHandler);
 
 export default notificationsApi;
