@@ -1,10 +1,36 @@
-import { Context } from "hono";
 import { createRoute } from "@hono/zod-openapi";
+import { WorkerEntrypoint } from "cloudflare:workers";
+import { Context } from "hono";
+import { env } from "hono/adapter";
 import { supabase } from "../utils/initSupabase";
 import generateAccessToken from "../utils/generateFirebaseAccessToken";
-import { env } from "hono/adapter";
+import sendFcmMessage from "../utils/sendFcmMessage";
 
-export const notifyInAppRoute = createRoute({
+export class Notify extends WorkerEntrypoint {
+  async fetch() {
+    return new Response("Success!", { status: 200 });
+  }
+
+  async sendMessage(
+    PROJECT_ID: string,
+    message: any,
+    accessToken: string,
+    deviceGroup: string
+  ) {
+    const response = await sendFcmMessage({
+      PROJECT_ID,
+      accessToken,
+      deviceGroup: deviceGroup,
+      isNotificationMessage: false,
+      notification: null,
+      dataMessage: message,
+    });
+
+    return response;
+  }
+}
+
+export const notifyRoute = createRoute({
   method: "post",
   path: "/notify",
   requestBody: {
@@ -20,7 +46,7 @@ export const notifyInAppRoute = createRoute({
               type: "object",
             },
           },
-          required: ["message"],
+          required: ["message", "userId"],
         },
       },
     },
@@ -39,7 +65,7 @@ export const notifyInAppRoute = createRoute({
   },
 });
 
-export async function notifyInApp(c: Context<{}, any, {}>): Promise<any> {
+export async function notifyHandler(c: Context<{}, any, {}>): Promise<any> {
   const { userId, message } = await c.req.json();
   const workersEnv = env<{
     FIREBASE_PROJECT_ID: string;
@@ -61,18 +87,15 @@ export async function notifyInApp(c: Context<{}, any, {}>): Promise<any> {
   }
 
   const accessToken = await generateAccessToken(c);
-  const response = await sendFcmMessage({
+
+  const notify = new Notify(c.executionCtx, c.env);
+
+  const response = (await notify.sendMessage(
     PROJECT_ID,
+    message,
     accessToken,
-    deviceGroup: user.device_group as string,
-    isNotificationMessage: false,
-    notification: null,
-    dataMessage: message,
-  });
+    user.device_group as string
+  )) as any;
 
-  if (!response.ok) {
-    return c.json({ error: "Failed to send notification" }, 500);
-  }
-
-  return c.json({ message: "Notification sent" }, 200);
+  return c.json({ response: response }, response.status);
 }
