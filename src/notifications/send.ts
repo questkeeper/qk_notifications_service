@@ -3,6 +3,7 @@ import { createRoute } from "@hono/zod-openapi";
 import { supabase } from "../utils/initSupabase";
 import generateAccessToken from "../utils/generateFirebaseAccessToken";
 import { env } from "hono/adapter";
+import sendFcmMessage from "../utils/sendFcmMessage";
 
 export const sendNotificationRoute = createRoute({
   method: "post",
@@ -78,7 +79,7 @@ export async function sendNotification(c: Context<{}, any, {}>): Promise<any> {
       message: notification.message,
     },
     dataMessage: null,
-  });
+  }) as Response;
 
   await supabase
     .from("notification_schedule")

@@ -1,4 +1,4 @@
-async function sendFcmMessage({
+export default async function sendFcmMessage({
   PROJECT_ID,
   accessToken,
   deviceGroup,
@@ -30,31 +30,27 @@ async function sendFcmMessage({
     throw new Error("Notification or data message is required");
   }
 
-  const messageBody =
-    isNotificationMessage === true
-      ? {
-          notification: {
-            title: notification?.title,
-            body: notification?.message,
-          },
-        }
-      : {
-          data: dataMessage,
-        };
-  return await fetch(
-    `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: {
-          ...messageBody,
-          token: deviceGroup,
+  try {
+    const response = await fetch(
+      `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
         },
-      }),
-    }
-  );
+        body: JSON.stringify({
+          message: {
+            data: dataMessage ?? dataMessage,
+            notification: notification ?? notification,
+            token: deviceGroup,
+          },
+        }),
+      }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error", error);
+    return error;
+  }
 }
