@@ -97,5 +97,5 @@ export async function notifyHandler(c: Context<{}, any, {}>): Promise<any> {
     user.device_group as string
   )) as any;
 
-  return c.json({ response: response }, response.status);
+  return c.json({ response: await response.json() }, response.status);
 }

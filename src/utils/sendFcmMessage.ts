@@ -30,6 +30,14 @@ export default async function sendFcmMessage({
     throw new Error("Notification or data message is required");
   }
 
+  const message = {
+    token: deviceGroup,
+  } as any;
+
+  isNotificationMessage
+    ? (message["notification"] = { notification })
+    : (message["data"] = dataMessage);
+
   try {
     const response = await fetch(
       `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
@@ -41,13 +49,12 @@ export default async function sendFcmMessage({
         },
         body: JSON.stringify({
           message: {
-            data: dataMessage ?? dataMessage,
-            notification: notification ?? { notification },
-            token: deviceGroup,
+            ...message,
           },
         }),
       }
     );
+
     return response;
   } catch (error) {
     console.error("Error", error);
