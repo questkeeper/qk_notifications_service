@@ -12,7 +12,7 @@ export default async function sendFcmMessage({
   isNotificationMessage: boolean;
   notification: {
     title: string;
-    message: string;
+    body: string;
   } | null;
   dataMessage: {
     [key: string]: string;
@@ -42,7 +42,7 @@ export default async function sendFcmMessage({
         body: JSON.stringify({
           message: {
             data: dataMessage ?? dataMessage,
-            notification: notification ?? notification,
+            notification: notification ?? { notification },
             token: deviceGroup,
           },
         }),

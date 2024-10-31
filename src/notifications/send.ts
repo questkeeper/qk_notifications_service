@@ -76,7 +76,7 @@ export async function sendNotification(c: Context<{}, any, {}>): Promise<any> {
     isNotificationMessage: true,
     notification: {
       title: notification.title,
-      message: notification.message,
+      body: notification.message,
     },
     dataMessage: null,
   }) as Response;
