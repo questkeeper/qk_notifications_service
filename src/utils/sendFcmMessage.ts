@@ -34,9 +34,22 @@ export default async function sendFcmMessage({
     token: deviceGroup,
   } as any;
 
-  isNotificationMessage
-    ? (message["notification"] = { notification })
-    : (message["data"] = dataMessage);
+  if (!isNotificationMessage) {
+    message.data = dataMessage;
+    message.apns = {
+      payload: {
+        aps: {
+          "content-available": 1,
+        },
+      },
+      headers: {
+        "apns-push-type": "background",
+        "apns-priority": "5",
+      },
+    };
+  } else {
+    message.notification = notification;
+  }
 
   try {
     const response = await fetch(
