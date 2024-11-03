@@ -42,7 +42,5 @@ export async function getNotificationsFromTaskId(
     .select("*")
     .eq("taskId", taskId);
 
-  console.log(scheduledNotifications);
-
   return c.json(scheduledNotifications);
 }

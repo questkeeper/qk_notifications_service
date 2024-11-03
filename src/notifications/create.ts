@@ -129,9 +129,9 @@ export async function createNotification(
     }
 
     // TODO: Temporary setup for notification times
-    const times = [24, 48];
+    const times = [12, 24];
     if (payload.starred) {
-      times.push(12);
+      times.push(48);
     }
     const notifications = Array<Notification>();
     const dueAt = new Date(payload.dueDate).toISOString();

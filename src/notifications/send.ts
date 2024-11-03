@@ -3,6 +3,7 @@ import { createRoute } from "@hono/zod-openapi";
 import { supabase } from "../utils/initSupabase";
 import generateAccessToken from "../utils/generateFirebaseAccessToken";
 import { env } from "hono/adapter";
+import sendFcmMessage from "../utils/sendFcmMessage";
 
 export const sendNotificationRoute = createRoute({
   method: "post",
@@ -68,25 +69,17 @@ export async function sendNotification(c: Context<{}, any, {}>): Promise<any> {
   }
 
   const accessToken = await generateAccessToken(c);
-  const response = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: {
-          notification: {
-            title: notification.title,
-            body: notification.message,
-          },
-          token: user.device_group,
-        },
-      }),
-    }
-  );
+  const response = await sendFcmMessage({
+    PROJECT_ID,
+    accessToken,
+    deviceGroup: user.device_group as string,
+    isNotificationMessage: true,
+    notification: {
+      title: notification.title,
+      body: notification.message,
+    },
+    dataMessage: null,
+  }) as Response;
 
   await supabase
     .from("notification_schedule")

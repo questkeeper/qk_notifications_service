@@ -25,8 +25,6 @@ async function deleteFcmTokenFromGroup(
   const accessToken = await generateAccessToken(c);
   const PROJECT_ID = workersEnv.FCM_PROJECT_ID;
 
-  console.log("Device group", user_device_group.data!.device_group);
-
   // Create the device group
   const url = `https://fcm.googleapis.com/fcm/notification`;
   const body = {
