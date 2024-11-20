@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "name": "Launch Wrangler",
+      "type": "node",
+      "request": "launch",
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "program": "${workspaceFolder}/node_modules/wrangler/bin/wrangler.js",
+      "args": ["dev", "--inspector-port=59203"],
+      "attachSimplePort": 59203,
+      "internalConsoleOptions": "neverOpen",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": false
+    }
+  ]
+}
