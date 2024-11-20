@@ -1,8 +1,8 @@
 {
   "name": "qk_notifications_service",
   "scripts": {
-    "dev": "wrangler dev src/index.ts --env dev",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "dev": "wrangler dev --env dev",
+    "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.4.1",
