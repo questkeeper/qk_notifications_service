@@ -1,15 +1,9 @@
 name = "qk_notifications_service"
-main = "src/index.ts"
+compatibility_date = "2024-09-02"
 
-compatibility_flags = []
-compatibility_date = "2024-09-23"
-
-[dev]
-port = 8790
-
-[[routes]]
-pattern = "api.questkeeper.app/v1/notifications*"
-zone_name = "questkeeper.app"
+routes = [
+    { pattern = "api.questkeeper.app/v1/notifications*", zone_name = "questkeeper.app" },
+]
 
 [vars]
 SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co"
@@ -20,12 +14,8 @@ FIREBASE_PROJECT_ID = "assigngo-d890c"
 [placement]
 mode = "off"
 
-[env.dev.vars]
-ENVIRONMENT = "dev"
-FCM_PROJECT_ID = "479691835174"
-FIREBASE_PROJECT_ID = "assigngo-d890c"
-FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-wh0yl@assigngo-d890c.iam.gserviceaccount.com"
-SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co"
+[env.dev]
+vars = { ENVIRONMENT = "dev", FCM_PROJECT_ID = "479691835174", FIREBASE_PROJECT_ID = "assigngo-d890c", FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-wh0yl@assigngo-d890c.iam.gserviceaccount.com", SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co" }
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
