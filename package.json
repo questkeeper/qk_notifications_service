@@ -1,7 +1,7 @@
 {
   "name": "qk_notifications_service",
   "scripts": {
-    "dev": "wrangler dev src/index.ts --env dev",
+    "dev": "wrangler dev src/index.ts --env dev --port 8790",
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
