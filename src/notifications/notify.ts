@@ -5,24 +5,35 @@ import { env } from "hono/adapter";
 import { supabase } from "../utils/initSupabase";
 import generateAccessToken from "../utils/generateFirebaseAccessToken";
 import sendFcmMessage from "../utils/sendFcmMessage";
+import { NotificationType } from "../utils/notificationTypes";
 
 export class Notify extends WorkerEntrypoint {
   async fetch() {
     return new Response("Success!", { status: 200 });
   }
 
-  async sendMessage(
-    PROJECT_ID: string,
-    message: any,
-    accessToken: string,
-    deviceGroup: string
-  ) {
+  async sendMessage({
+    projectId,
+    message,
+    notificationType,
+    notification,
+    accessToken,
+    deviceGroup,
+  }: {
+    projectId: string;
+    message: any | null;
+    notificationType: NotificationType;
+    notification: { title: string; body: string } | null;
+    accessToken: string;
+    deviceGroup: string;
+  }) {
     const response = await sendFcmMessage({
-      PROJECT_ID,
+      PROJECT_ID: projectId,
       accessToken,
       deviceGroup: deviceGroup,
-      isNotificationMessage: false,
-      notification: null,
+      isNotificationMessage: notification !== null,
+      notification: notification,
+      notificationType: notificationType,
       dataMessage: message,
     });
 
@@ -45,8 +56,9 @@ export const notifyRoute = createRoute({
             message: {
               type: "object",
             },
+            type: { type: "string" },
           },
-          required: ["message", "userId"],
+          required: ["type", "message", "userId"],
         },
       },
     },
@@ -66,7 +78,7 @@ export const notifyRoute = createRoute({
 });
 
 export async function notifyHandler(c: Context<{}, any, {}>): Promise<any> {
-  const { userId, message } = await c.req.json();
+  const { userId, message: object, type } = await c.req.json();
   const workersEnv = env<{
     FIREBASE_PROJECT_ID: string;
   }>(c);
@@ -86,16 +98,28 @@ export async function notifyHandler(c: Context<{}, any, {}>): Promise<any> {
     return c.json({ error: "Failed to get user" }, 500);
   }
 
+  const notificationType =
+    NotificationType[type as keyof typeof NotificationType];
+
   const accessToken = await generateAccessToken(c);
 
   const notify = new Notify(c.executionCtx, c.env);
 
-  const response = (await notify.sendMessage(
-    PROJECT_ID,
-    message,
+  // if message contains title and body, then set type to notification
+  const message = object;
+  let isNotificationMessage = false;
+  if (message.title && message.body) {
+    isNotificationMessage = true;
+  }
+
+  const response = (await notify.sendMessage({
+    projectId: PROJECT_ID,
+    message: isNotificationMessage ? null : message,
+    notificationType,
+    notification: isNotificationMessage ? message : null,
     accessToken,
-    user.device_group as string
-  )) as any;
+    deviceGroup: user.device_group as string,
+  })) as any;
 
   return c.json({ response: await response.json() }, response.status);
 }

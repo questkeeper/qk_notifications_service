@@ -1,3 +1,6 @@
+import { supabase } from "./initSupabase";
+import { NotificationType } from "./notificationTypes";
+
 export default async function sendFcmMessage({
   PROJECT_ID,
   accessToken,
@@ -5,6 +8,7 @@ export default async function sendFcmMessage({
   isNotificationMessage,
   notification,
   dataMessage,
+  notificationType,
 }: {
   PROJECT_ID: string;
   accessToken: string;
@@ -17,6 +21,7 @@ export default async function sendFcmMessage({
   dataMessage: {
     [key: string]: string;
   } | null;
+  notificationType: NotificationType;
 }) {
   if (isNotificationMessage === true && notification === null) {
     throw new Error("Notification message is required");
@@ -67,7 +72,7 @@ export default async function sendFcmMessage({
         }),
       }
     );
-
+    
     return response;
   } catch (error) {
     console.error("Error", error);
