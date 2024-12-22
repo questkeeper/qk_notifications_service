@@ -127,12 +127,29 @@ export async function createNotification(
         return c.json(resData, 200);
       }
     }
+    const times: number[] = [];
 
-    // TODO: Temporary setup for notification times
-    const times = [12, 24];
-    if (payload.starred) {
-      times.push(48);
+    // Fetch the user's space
+    const { data: spaces, error: spacesError } = await supabase
+      .from("spaces")
+      .select("notificationTimes")
+      .eq("id", payload.spaceId!);
+
+    if (spacesError || !spaces || spaces.length === 0) {
+      times.push(12, 24); // Default times in case smthn went wrong or no space is selected
+      if (payload.starred) times.push(48);
+    } else {
+      const notifciationTimes = spaces[0].notificationTimes as {
+        standard: number[];
+        prioritized: number[];
+      };
+      times.push(...notifciationTimes.standard);
+
+      if (payload.starred) {
+        times.push(...notifciationTimes.prioritized);
+      }
     }
+
     const notifications = Array<Notification>();
     const dueAt = new Date(payload.dueDate).toISOString();
 
