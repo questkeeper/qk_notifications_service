@@ -11,6 +11,10 @@ port = 8790
 pattern = "api.questkeeper.app/v1/notifications*"
 zone_name = "questkeeper.app"
 
+[observability]
+enabled = true
+head_sampling_rate = 1 # 1 = 100%
+
 [vars]
 SUPABASE_URL = "https://mzudaknbrzixjkvjqayw.supabase.co"
 FCM_PROJECT_ID = "479691835174"
